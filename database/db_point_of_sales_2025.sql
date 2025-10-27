@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 23, 2025 at 10:02 AM
+-- Generation Time: Oct 27, 2025 at 09:03 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -64,7 +64,12 @@ CREATE TABLE `orders` (
 --
 
 INSERT INTO `orders` (`id`, `order_code`, `order_date`, `order_amount`, `order_change`, `order_status`) VALUES
-(2, 'ABC-20250802', '2025-10-21 14:28:51', NULL, NULL, 0);
+(2, 'ABC-20250802', '2025-10-21 14:28:51', NULL, NULL, 0),
+(5, 'ODR-20251027084439', '2025-10-27 08:44:39', 0.00, 0.00, 0),
+(6, 'ODR-20251027084442', '2025-10-27 08:44:42', 0.00, 0.00, 0),
+(7, 'ODR-20251027084720', '2025-10-27 08:47:20', 110000.00, 0.00, 1),
+(8, 'ODR-20251027084720', '2025-10-27 08:47:20', 110000.00, 0.00, 1),
+(9, 'ODR-20251027090105', '2025-10-27 09:01:05', 22000.00, 0.00, 1);
 
 -- --------------------------------------------------------
 
@@ -86,7 +91,8 @@ CREATE TABLE `order_details` (
 --
 
 INSERT INTO `order_details` (`id`, `order_id`, `product_id`, `qty`, `order_price`, `order_subtotal`) VALUES
-(3, 2, 2, 2, 25000.00, 25000.00);
+(3, 2, 2, 2, 25000.00, 25000.00),
+(7, 9, 12, 1, 20000.00, 20000.00);
 
 -- --------------------------------------------------------
 
@@ -227,13 +233,13 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `order_details`
 --
 ALTER TABLE `order_details`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `products`
