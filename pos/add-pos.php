@@ -8,6 +8,35 @@ $fetchCats = mysqli_fetch_all($queryCat, MYSQLI_ASSOC);
 $queryProducts = mysqli_query($koneksi, "SELECT c.category_name, p.* FROM products p LEFT JOIN categories c ON c.id = p.category_id");
 $fetchProducts = mysqli_fetch_all($queryProducts, MYSQLI_ASSOC);
 
+
+if (isset($_GET['payment'])) {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $cart = $data["cart"];
+    $subtotal = array_reduce($cart, function ($sum, $item) {
+
+        return $sum + ($item['product_price'] * $item['quantity']);
+    }, 0);
+    $tax = $subtotal * 0.1;
+    $orderAmount = $subtotal + $tax;
+
+    $orderCode = 'ODR-' . date('YmdHis');
+    $orderDate = date("Y-m-d H:i:s");
+    $orderChange = 0;
+    $orderStatus = 1;
+
+    $insertOrder = mysqli_query($koneksi, "INSERT INTO orders (order_code, order_date, order_amount, order_change, order_status) VALUES ('$orderCode', '$orderDate', '$orderAmount', '$orderChange', '$orderStatus')");
+    $idOrder = mysqli_insert_id($koneksi);
+
+    foreach ($cart as $v) {
+        $product_id = $v['id'];
+        $qty = $v['quantity'];
+        $order_price = $v['product_price'];
+        $subtotal = $qty * $order_price;
+
+        $insertOrderDetails = mysqli_query($koneksi, "INSERT INTO order_details (order_id, product_id, qty, order_price, order_subtotal) VALUES ('$idOrder', '$product_id', '$qty', '$order_price', '$subtotal')");
+    }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -34,7 +63,7 @@ $fetchProducts = mysqli_fetch_all($queryProducts, MYSQLI_ASSOC);
             <div class="col-md-7 product-section">
                 <div class="mb-4">
                     <h4 class="mb-3" id="product-title"><i class="bi bi-shop"></i>
-                        Data Product
+                        Product
                     </h4>
                     <input type="text" id="searchProduct" class="form-control search-box" placeholder="Find Product...">
                 </div>
@@ -64,25 +93,25 @@ $fetchProducts = mysqli_fetch_all($queryProducts, MYSQLI_ASSOC);
                     <div class="total-section">
                         <div class="d-flex justify-content-between mb-2">
                             <span>Subtotal :</span>
-                            <span id="subtotal">Rp. 100.000</span>
+                            <span id="subtotal">Rp. 0</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Pajak (10%) :</span>
-                            <span id="tax">Rp. 100.00</span>
+                            <span id="tax">Rp. 0</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Total :</span>
-                            <span id="total">Rp. 110.000</span>
+                            <span id="total">Rp. 0</span>
                         </div>
                     </div>
                     <div class="row g-2">
                         <div class="col-md-6">
-                            <button class="btn btn-outline-danger w-100">
+                            <button class="btn fw-bold p-3 btn-danger w-100" id="clearCart">
                                 <i class="bi bi-trash"></i> Clear Cart
                             </button>
                         </div>
                         <div class="col-md-6">
-                            <button class="btn btn-checkout btn-primary w-100">
+                            <button class="btn fw-bold p-3 btn-primary w-100" onclick="processPayment()">
                                 <i class="bi bi-cash"></i> Process Payment
                             </button>
                         </div>
