@@ -144,13 +144,9 @@ function renderProducts(searchProduct = "") {
 let cart = [];
 function addToCart(id) {
   const product = products.find((p) => p.id == id);
-//   if (!product) {
-//     return;
-//   }
   const existing = cart.find((item) => item.id == id);
   if (existing) {
     existing.quantity += 1;
-    alert("The product is already in the cart!");
   } else {
     cart.push({ ...product, quantity: 1 });
   }
@@ -234,16 +230,27 @@ document.getElementById("clearCart").addEventListener("click",
 });
 
 async function processPayment() {
-    if (card.length === 0) {
-        alert("Cart Still Empty!");
-    } try {
+    if (cart.length === 0){
+        alert("Cart still empty!");
+        return;
+    }
+    try {
         const res = await fetch("add-pos.php?payment", {
             method: "POST",
-            headers: {"Content-Type" : "application/json"},
-            body: JSON.stringify({cart}),
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ cart }),
         });
-    } catch (error) {
+        const data = await res.json();
+        if (data.status == "success"){
+            alert("Transaction Successfully!");
+            window.location.href = "print.php";
+        }else{
+          alert("Transaction Failed", data.message);
+        }
         
+    } catch (error) {
+        alert("Upss Transaction failed!")
+        console.log("error", error); die;
     }
 }
 
