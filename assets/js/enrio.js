@@ -218,6 +218,10 @@ function updateTotal() {
     document.getElementById("subtotal").textContent = `Rp. ${subtotal.toLocaleString()}`;
     document.getElementById("tax").textContent = `Rp. ${tax.toLocaleString()}`;
     document.getElementById("total").textContent = `Rp. ${total.toLocaleString()}`;
+
+    document.getElementById("subtotal_value").value = subtotal;
+    document.getElementById("tax_value").value = tax;
+    document.getElementById("total_value").value = total;
     // console.log(subtotal);
     // console.log(tax);
     // console.log(total);
@@ -234,11 +238,15 @@ async function processPayment() {
         alert("Cart still empty!");
         return;
     }
+    const order_code = document.querySelector('.orderNumber').textContent.trim();
+    const subtotal = document.querySelector('#subtotal_value').value.trim();
+    const tax = document.querySelector('#tax_value').value.trim();
+    const grandTotal = document.querySelector('#total_value').value.trim();
     try {
         const res = await fetch("add-pos.php?payment", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ cart }),
+            body: JSON.stringify({ cart, order_code, subtotal, tax, grandTotal }),
         });
         const data = await res.json();
         if (data.status == "success"){
@@ -250,7 +258,8 @@ async function processPayment() {
         
     } catch (error) {
         alert("Upss Transaction failed!")
-        console.log("error", error); die;
+        console.log("error", error); 
+        die;
     }
 }
 

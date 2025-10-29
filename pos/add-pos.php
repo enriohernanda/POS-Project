@@ -15,16 +15,16 @@ if (isset($_GET['payment'])) {
     $data = json_decode(file_get_contents('php://input'), true);
 
     $cart = $data["cart"];
-    $subtotal = array_reduce($cart, function ($sum, $item) {
+    $total = array_reduce($cart, function ($sum, $item) {
         return $sum + ($item['product_price'] * $item['quantity']);
     }, 0);
-    $tax = $subtotal * 0.1;
-    $orderAmount = $subtotal + $tax;
-
-    $orderCode = 'ODR-' . date('YmdHis');
+    $tax = $data['tax'];
+    $orderAmount = $data['grandTotal'];
+    $orderCode = $data['order_code'];
     $orderDate = date("Y-m-d H:i:s");
     $orderChange = 0;
     $orderStatus = 1;
+    $subtotal = $data['subtotal'];
 
     try {
         $insertOrder = mysqli_query($koneksi, "INSERT INTO orders (order_code, order_date, order_amount, order_subtotal, order_status) VALUES ('$orderCode', '$orderDate', '$orderAmount', '$subtotal', '$orderStatus')");
@@ -64,6 +64,12 @@ if (isset($_GET['payment'])) {
         // ['status': '', 'message': ''];
     }
 }
+
+$orderNumbers = mysqli_query($koneksi, "SELECT id FROM orders ORDER BY id DESC LIMIT 1");
+$row = mysqli_fetch_assoc($orderNumbers);
+$nextId = $row ? $row['id'] + 1 : 1;
+// str_pad
+$order_code = "ORD-" . date('dmy') . str_pad($nextId, 4, "0", STR_PAD_LEFT);
 
 ?>
 
@@ -109,7 +115,8 @@ if (isset($_GET['payment'])) {
             <div class="col-md-5 cart-section">
                 <div class="cart-header">
                     <h4>Cart</h4>
-                    <small>Order # <span class="orderNumber">001</span></small>
+                    <!-- FORMAT: ORD-date-001 -->
+                    <small>Order # <span class="orderNumber"><?php echo $order_code ?></span></small>
                 </div>
                 <div class="cart-items" id="cartItems">
                     <div class="text-center text-muted mt-5">
@@ -121,15 +128,18 @@ if (isset($_GET['payment'])) {
                     <div class="total-section">
                         <div class="d-flex justify-content-between mb-2">
                             <span>Subtotal :</span>
-                            <span id="subtotal">Rp. 0</span>
+                            <span id="subtotal">Rp. 0.0</span>
+                            <input type="hidden" id="subtotal_value">
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Pajak (10%) :</span>
-                            <span id="tax">Rp. 0</span>
+                            <span id="tax">Rp. 0.0</span>
+                            <input type="hidden" id="tax_value">
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Total :</span>
-                            <span id="total">Rp. 0</span>
+                            <span id="total">Rp. 0.0</span>
+                            <input type="hidden" id="total_value">
                         </div>
                     </div>
                     <div class="row g-2">
